@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+  function validTask(data, uid) {
+   return data.keys().hasAll(['title','description','completed','priority','dueDate','userId','createdAt','updatedAt'])
+    && data.keys().hasOnly(['title','description','completed','priority','dueDate','userId','createdAt','updatedAt'])
+    && data.userId == uid
+    && data.title is string && data.title.size() > 0 && data.title.size() <= 120
+    && data.description is string && data.description.size() <= 2000
+    && data.completed is bool && data.priority in ['low','medium','high']
+    && data.dueDate is string && (data.dueDate == '' || data.dueDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
+    && data.createdAt is timestamp && data.updatedAt is timestamp;
+  }
+  match /users/{uid}/tasks/{taskId} {
+   allow read, delete: if owner(uid);
+   allow create: if owner(uid) && validTask(request.resource.data, uid)
+    && request.resource.data.completed == false
+    && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+   allow update: if owner(uid) && validTask(request.resource.data, uid)
+    && request.resource.data.createdAt == resource.data.createdAt
+    && request.resource.data.updatedAt == request.time;
+  }
+  // El servidor Admin SDK administra este límite; el cliente no puede modificarlo.
+  match /emailLimits/{uid} { allow read, write: if false; }
+ }
+}

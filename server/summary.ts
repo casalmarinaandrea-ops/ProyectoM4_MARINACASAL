@@ -1,0 +1,10 @@
+export interface SummaryTask { title: string; description: string; completed: boolean; priority: string; dueDate: string }
+export function escapeHtml(value: string): string { return value.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!)); }
+export function buildSummary(tasks: SummaryTask[]) {
+ const completed=tasks.filter(t=>t.completed).length; const pending=tasks.length-completed;
+ const heading=`Resumen de tareas: ${tasks.length} en total, ${pending} pendientes y ${completed} completadas.`;
+ const labels:Record<string,string>={high:'Alta',medium:'Media',low:'Baja'};
+ const lines=tasks.map(t=>`${t.completed?'✓':'○'} ${t.title} · Prioridad: ${labels[t.priority]||t.priority}${t.dueDate?' · Vence: '+t.dueDate:''}${t.description?'\n'+t.description:''}`);
+ const rows=tasks.map(t=>`<tr><td style="padding:14px;border-bottom:1px solid #eee"><strong>${escapeHtml(t.title)}</strong>${t.description?`<p>${escapeHtml(t.description).replace(/\n/g,'<br>')}</p>`:''}<small>${escapeHtml(labels[t.priority]||t.priority)}${t.dueDate?' · '+escapeHtml(t.dueDate):''}</small></td><td style="padding:14px;border-bottom:1px solid #eee">${t.completed?'Completada':'Pendiente'}</td></tr>`).join('');
+ return { subject:'Tu resumen de tareas · Enfoco', text:`${heading}\n\n${lines.length?lines.join('\n\n'):'Todavía no tenés tareas. Un buen momento para empezar.'}\n\nEnfoco · Un paso a la vez.`, html:`<!doctype html><html lang="es"><body style="font-family:Arial,sans-serif;color:#342b45;background:#f8f6fc;padding:24px"><main style="max-width:650px;margin:auto;background:#fff;padding:28px;border-radius:14px"><h1 style="color:#6d4aff">enfoco.</h1><h2>Tu progreso, en un vistazo</h2><p>${heading}</p><table style="border-collapse:collapse;width:100%"><thead><tr><th align="left">Tarea</th><th align="left">Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="2">Todavía no tenés tareas.</td></tr>'}</tbody></table><p style="color:#9a8da7;margin-top:28px">Un paso a la vez. Cada tarea completada cuenta.</p></main></body></html>` };
+}
