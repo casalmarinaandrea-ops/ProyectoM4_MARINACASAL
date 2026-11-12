@@ -4,6 +4,10 @@ Aplicación web SPA para organizar tareas personales, establecer prioridades y r
 
 Proyecto Integrador M4 · Full Stack · Marina Casal
 
+## 🎬 Demo de Enfoco
+
+![Demostración de Enfoco](./docs/gif.gif)
+
 ## 🌐 Enlaces
 
 - **Aplicación:** https://proyecto-m4-marinacasal.vercel.app
